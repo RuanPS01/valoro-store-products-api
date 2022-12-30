@@ -1,0 +1,1 @@
+# valoro-store-products-api
