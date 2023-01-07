@@ -1,6 +1,6 @@
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Inject, Post, Req } from '@nestjs/common';
+import { Request } from 'express';
 import {
-  ApiBearerAuth,
   ApiBody,
   ApiExtraModels,
   ApiOperation,
@@ -13,8 +13,8 @@ import { IsRegisterPresenter } from './register.presenter';
 
 import { UsecasesProxyModule } from '@external/dependency-injection-proxy/usecases-proxy.module';
 import { UseCaseProxy } from '@external/dependency-injection-proxy/usecases-proxy';
-import { RegisterUseCase } from '@usecases/v1/auth/register/register.usecase';
-import { JwtAuthGuard } from '@main/guards/jwtAuth.guard';
+import { RegisterUseCase } from '@usecases/v1/products/register/register.usecase';
+import { AuthenticateMiddleware } from '@main/middlewares/authenticate-middleware';
 
 @Controller('products')
 @ApiTags('products')
@@ -28,15 +28,22 @@ export class RegisterController {
   constructor(
     @Inject(UsecasesProxyModule.REGISTER_USECASES_PROXY)
     private readonly registerUsecaseProxy: UseCaseProxy<RegisterUseCase>,
+    @Inject(UsecasesProxyModule.AUTHENTICATE_MIDDLEWARE)
+    private readonly authenticateMiddleware: UseCaseProxy<AuthenticateMiddleware>,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post('register')
   @ApiBody({ type: RegisterDto })
   @ApiOperation({ description: 'register' })
-  async register(@Body() payload: RegisterDto) {
+  async register(@Req() request: Request, @Body() payload: RegisterDto) {
+    const authenticatedUserData = await this.authenticateMiddleware
+      .getInstance()
+      .auth(request.headers.authorization);
     const { data } = await this.registerUsecaseProxy.getInstance().execute({
+      sellerUserId: authenticatedUserData.id,
+      sellerUserEmail: authenticatedUserData.email,
       category: payload.category,
+      rarity: payload.rarity,
       name: payload.name,
       promotionPercent: payload.promotionPercent,
       spotPrice: payload.spotPrice,

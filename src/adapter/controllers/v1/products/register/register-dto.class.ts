@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
@@ -12,10 +13,10 @@ export class RegisterDto {
   @IsString()
   readonly name: string;
 
-  @ApiProperty({ required: true })
-  @IsNotEmpty()
-  @IsNumber()
-  readonly promotionPercent: number;
+  // @ApiProperty({ required: true })
+  @Optional()
+  // @IsNumber()
+  readonly promotionPercent?: number;
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
@@ -42,8 +43,14 @@ export class RegisterDto {
   @IsString()
   readonly origin: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: true })
+  @IsNotEmpty()
   @IsString()
+  readonly rarity: number;
+
+  // @ApiProperty({ required: false })
+  @Optional()
+  // @IsString()
   readonly resources?: string;
 
   @ApiProperty({ required: true })

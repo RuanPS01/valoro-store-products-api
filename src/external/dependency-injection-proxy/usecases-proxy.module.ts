@@ -4,12 +4,13 @@ import { UseCaseProxy } from './usecases-proxy';
 import { ProductRepositoryModule } from '@external/orm/repositories/product.repository.module';
 import { ProductRepositoryImpl } from '@external/orm/repositories/product.repository';
 import { EnvironmentConfigModule } from '@main/config/environment-config/environment-config.module';
-import { EnvironmentConfigService } from '@main/config/environment-config/environment-config.service';
 import { LoggerImpl } from '@external/logger/logger.service';
 import { ErrorsModule } from '@usecases/errors/errors.module';
 import { ErrorsService } from '@usecases/errors/errors.service';
-import { RegisterUseCase } from '@usecases/v1/auth/register/register.usecase';
-import { ListUseCase } from '@usecases/v1/auth/list/list.usecase';
+import { RegisterUseCase } from '@usecases/v1/products/register/register.usecase';
+import { ListUseCase } from '@usecases/v1/products/list/list.usecase';
+import { AuthenticateMiddleware } from '@main/middlewares/authenticate-middleware';
+import { EnvironmentConfigService } from '@main/config/environment-config/environment-config.service';
 
 @Module({
   imports: [
@@ -23,18 +24,14 @@ export class UsecasesProxyModule {
   // Auth
   static LIST_USECASES_PROXY = 'ListUseCasesProxy';
   static REGISTER_USECASES_PROXY = 'RegisterUseCasesProxy';
+  static AUTHENTICATE_MIDDLEWARE = 'AuthenticateMiddleware';
 
   static register(): DynamicModule {
     return {
       module: UsecasesProxyModule,
       providers: [
         {
-          inject: [
-            LoggerImpl,
-            EnvironmentConfigService,
-            ProductRepositoryImpl,
-            ErrorsService,
-          ],
+          inject: [LoggerImpl, ProductRepositoryImpl],
           provide: UsecasesProxyModule.LIST_USECASES_PROXY,
           useFactory: (
             logger: LoggerImpl,
@@ -53,10 +50,22 @@ export class UsecasesProxyModule {
               new RegisterUseCase(logger, productRepo, errorsService),
             ),
         },
+        {
+          inject: [EnvironmentConfigService, ErrorsService],
+          provide: UsecasesProxyModule.AUTHENTICATE_MIDDLEWARE,
+          useFactory: (
+            configService: EnvironmentConfigService,
+            errorsService: ErrorsService,
+          ) =>
+            new UseCaseProxy(
+              new AuthenticateMiddleware(configService, errorsService),
+            ),
+        },
       ],
       exports: [
         UsecasesProxyModule.LIST_USECASES_PROXY,
         UsecasesProxyModule.REGISTER_USECASES_PROXY,
+        UsecasesProxyModule.AUTHENTICATE_MIDDLEWARE,
       ],
     };
   }

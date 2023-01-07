@@ -14,7 +14,13 @@ export class ListUseCase {
   async execute(payload: ListRequest): Promise<ProductResponseEither> {
     const products = await this.productRepository.find(payload);
 
-    const response: ProductResponse = products;
+    const response: ProductResponse = {
+      items: products.items,
+      page: products.page,
+      totalItems: products.totalItems,
+      itemsPerPage: products.itemsPerPage,
+      totalPages: products.totalPages,
+    };
     this.logger.info(
       'ListUseCase execute',
       `The list of products have been getted.`,

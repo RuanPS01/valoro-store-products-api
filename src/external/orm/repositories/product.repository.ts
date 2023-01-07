@@ -2,9 +2,9 @@ import { Product } from '@entities/product';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ProductRepositoryPort } from '@usecases/port/product-repository';
-import { FindProductOptions } from '@usecases/v1/auth/interfaces/find-product-options';
-import { ListProductOptions } from '@usecases/v1/auth/interfaces/list-product-options';
-import { ListProductResponse } from '@usecases/v1/auth/interfaces/list-product-response';
+import { FindProductOptions } from '@usecases/v1/products/interfaces/find-product-options';
+import { ListProductOptions } from '@usecases/v1/products/interfaces/list-product-options';
+import { ListProductResponse } from '@usecases/v1/products/interfaces/list-product-response';
 import { Model } from 'mongoose';
 import { ProductEntity } from '../schemas/product.schema';
 
@@ -25,105 +25,136 @@ export class ProductRepositoryImpl implements ProductRepositoryPort {
   }
 
   async save(entity: Product): Promise<Product> {
-    console.log('product-repository', entity);
     const product: Product = await this.productModel.create(entity);
     return product;
   }
 
-  async find({
-    category,
-    inPromotion,
-    promotionPercentMin,
-    spotPriceMax,
-    spotPriceMin,
-    forwardPriceMax,
-    forwardPriceMin,
-    maxInstallmentsInterestFreeMin,
-    collectionName,
-    origin,
-    haveResources,
-    itemsPerPage,
-    page,
-  }: ListProductOptions): Promise<ListProductResponse> {
-    const products: Product[] = [];
+  async find(
+    findListProductsOptions: ListProductOptions,
+  ): Promise<ListProductResponse> {
+    const {
+      category,
+      name,
+      inPromotion,
+      promotionPercentMin,
+      spotPriceMax,
+      spotPriceMin,
+      forwardPriceMax,
+      forwardPriceMin,
+      maxInstallmentsInterestFreeMin,
+      collectionName,
+      order,
+      referenceOrder,
+      origin,
+      haveResources,
+      itemsPerPage,
+      sellerUserId,
+      sellerUserEmail,
+      page,
+    } = findListProductsOptions;
+    let products;
+
+    console.log('findListProductsOptions ', findListProductsOptions);
 
     if (category) {
-      products.concat(
-        await this.productModel.find({
-          category: { $regex: `/${category}/i` },
-        }),
-      );
+      products = await this.productModel
+        .find()
+        .where('category')
+        .equals(category)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
+
+    if (name) {
+      products = await this.productModel.find().where('name').equals(name);
+    }
+
     if (collectionName) {
-      products.concat(
-        await this.productModel.find({
-          collectionName: { $regex: `/${collectionName}/i` },
-        }),
-      );
+      products = await this.productModel
+        .find()
+        .where('collectionName')
+        .equals(collectionName)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
     if (origin) {
-      products.concat(
-        await this.productModel.find({
-          origin: { $regex: `/${origin}/i` },
-        }),
-      );
+      products = await this.productModel
+        .find()
+        .where('collectionName')
+        .equals(collectionName)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
 
     if (haveResources) {
-      products.concat(
-        await this.productModel.find().where('resources').ne(null),
-      );
+      products = await this.productModel.find().where('resources').ne(null);
+    }
+
+    if (sellerUserId) {
+      products = await this.productModel
+        .find()
+        .where('sellerUserId')
+        .equals(sellerUserId)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
+    }
+
+    if (sellerUserEmail) {
+      products = await this.productModel
+        .find()
+        .where('sellerUserId')
+        .equals(sellerUserId)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
 
     if (inPromotion) {
-      products.concat(
-        await this.productModel.find().where('inPromotion').equals(true),
-      );
+      products = await this.productModel.find().where('promotionPercent').gt(0);
     }
     if (promotionPercentMin) {
-      products.concat(
-        await this.productModel
-          .find()
-          .where('promotionPercent')
-          .gt(promotionPercentMin),
-      );
+      products = await this.productModel
+        .find()
+        .where('promotionPercent')
+        .gt(promotionPercentMin)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
     if (spotPriceMax) {
-      products.concat(
-        await this.productModel.find().where('spotPrice').lt(spotPriceMax),
-      );
+      products = await this.productModel
+        .find()
+        .where('spotPrice')
+        .lt(spotPriceMax)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
     if (spotPriceMin) {
-      products.concat(
-        await this.productModel.find().where('spotPrice').gt(spotPriceMin),
-      );
+      products = await this.productModel
+        .find()
+        .where('spotPrice')
+        .gt(spotPriceMin)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
     if (forwardPriceMax) {
-      products.concat(
-        await this.productModel
-          .find()
-          .where('forwardPrice')
-          .lt(forwardPriceMax),
-      );
+      products = await this.productModel
+        .find()
+        .where('forwardPrice')
+        .lt(forwardPriceMax)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
     if (forwardPriceMin) {
-      products.concat(
-        await this.productModel
-          .find()
-          .where('forwardPrice')
-          .gt(forwardPriceMin),
-      );
+      products = await this.productModel
+        .find()
+        .where('forwardPrice')
+        .gt(forwardPriceMin)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
     if (maxInstallmentsInterestFreeMin) {
-      products.concat(
-        await this.productModel
-          .find()
-          .where('maxInstallmentsInterestFree')
-          .gt(maxInstallmentsInterestFreeMin),
-      );
+      products = await this.productModel
+        .find()
+        .where('maxInstallmentsInterestFree')
+        .gt(maxInstallmentsInterestFreeMin)
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
     }
 
-    if (itemsPerPage) {
+    if (!products)
+      products = await this.productModel
+        .find()
+        .sort({ [referenceOrder]: order === 'asc' ? 1 : -1 });
+
+    if (itemsPerPage && page && products) {
       const paginatedListOfProduct = this.paginateProducts(
         products,
         itemsPerPage,
@@ -131,13 +162,14 @@ export class ProductRepositoryImpl implements ProductRepositoryPort {
       const totalPages = Math.ceil(products.length / itemsPerPage);
 
       return {
-        items: paginatedListOfProduct[page],
+        items: paginatedListOfProduct[page - 1],
         page,
         totalItems: products.length,
         itemsPerPage,
         totalPages,
       };
     }
+
     return {
       items: products,
       page: 1,

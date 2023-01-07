@@ -7,7 +7,7 @@ export interface Product {
 
   name: string;
 
-  promotionPercent: number;
+  promotionPercent?: number;
 
   spotPrice: number;
 
@@ -20,6 +20,12 @@ export interface Product {
   origin: string;
 
   resources?: string;
+
+  sellerUserId: string;
+
+  sellerUserEmail: string;
+
+  rarity: number;
 
   image: string;
 }

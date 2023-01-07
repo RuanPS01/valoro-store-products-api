@@ -19,15 +19,6 @@ class EnvironmentVariables {
   NODE_ENV: Environment;
 
   @IsString()
-  AUTH_SECRET: string;
-  @IsString()
-  AUTH_EXPIRES_IN: string;
-  @IsString()
-  REFRESH_SECRET: string;
-  @IsString()
-  REFRESH_EXPIRES_IN: string;
-
-  @IsString()
   DATABASE_HOST: string;
   @IsNumber()
   DATABASE_PORT: number;
@@ -46,6 +37,11 @@ class EnvironmentVariables {
   EMAIL_ADDRESS: string;
   @IsString()
   EMAIL_PASSWORD: string;
+
+  @IsString()
+  AUTHENTICATION_API_HOST: string;
+  @IsString()
+  AUTHENTICATION_PATH: string;
 }
 
 export function validate(config: Record<string, unknown>) {

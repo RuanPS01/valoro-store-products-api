@@ -5,8 +5,9 @@ import { UsecasesProxyModule } from '@external/dependency-injection-proxy/usecas
 import { ErrorsModule } from '@usecases/errors/errors.module';
 import { LoggerModule } from '@external/logger/logger.module';
 import { EnvironmentConfigModule } from '@main/config/environment-config/environment-config.module';
-import { ControllersModule } from './adapter/controllers/v1/auth/controllers.module';
+import { ControllersModule } from './adapter/controllers/v1/products/controllers.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { HttpModule } from '@nestjs/axios';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -23,7 +24,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     ErrorsModule,
     ControllersModule,
     EnvironmentConfigModule,
+    HttpModule,
   ],
-  providers: [],
 })
 export class AppModule {}

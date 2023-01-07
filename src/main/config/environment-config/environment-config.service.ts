@@ -1,29 +1,10 @@
 import { DatabaseConfigPort } from '@main/port/database.interface';
-import { JwtConfigPort } from '@main/port/jwt.interface';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class EnvironmentConfigService
-  implements DatabaseConfigPort, JwtConfigPort
-{
+export class EnvironmentConfigService implements DatabaseConfigPort {
   constructor(private configService: ConfigService) {}
-
-  getJwtSecret(): string {
-    return this.configService.get<string>('AUTH_SECRET');
-  }
-
-  getJwtExpirationTime(): string {
-    return this.configService.get<string>('AUTH_EXPIRES_IN');
-  }
-
-  getJwtRefreshSecret(): string {
-    return this.configService.get<string>('REFRESH_SECRET');
-  }
-
-  getJwtRefreshExpirationTime(): string {
-    return this.configService.get<string>('REFRESH_EXPIRES_IN');
-  }
 
   getDatabaseHost(): string {
     return this.configService.get<string>('DATABASE_HOST');
@@ -59,5 +40,13 @@ export class EnvironmentConfigService
 
   getDatabaseEmailPassword(): string {
     return this.configService.get<string>('EMAIL_PASSWORD');
+  }
+
+  getAuthApiHost(): string {
+    return this.configService.get<string>('AUTHENTICATION_API_HOST');
+  }
+
+  getAuthenticatePath(): string {
+    return this.configService.get<string>('AUTHENTICATION_PATH');
   }
 }

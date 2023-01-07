@@ -37,7 +37,16 @@ export class ProductEntity implements Product {
   resources: string;
 
   @Prop({ required: true, type: String })
+  sellerUserId: string;
+
+  @Prop({ required: true, type: String })
+  sellerUserEmail: string;
+
+  @Prop({ required: true, type: String })
   image: string;
+
+  @Prop({ required: true, type: Number })
+  rarity: number;
 
   @Prop({ default: Date.now })
   createdAt: Date;
