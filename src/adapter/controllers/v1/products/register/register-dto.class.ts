@@ -45,7 +45,7 @@ export class RegisterDto {
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   readonly rarity: number;
 
   // @ApiProperty({ required: false })
